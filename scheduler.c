@@ -49,8 +49,6 @@ void fcfs(int total_tracks, int init_head, int request[][2], int num_requests){
     printf("\n%d\n", seek_time);
     printf("%d\n", current_time);
 }
-
-
 void sstf(int total_tracks, int init_head, int request[][2], int num_requests){
     int seek_time = 0;
     int completion_time = 0;
@@ -85,7 +83,6 @@ void sstf(int total_tracks, int init_head, int request[][2], int num_requests){
     printf("%d\n", completion_time);
 
 }
-
 void scan(int total_tracks, int init_head, int request[][2], char init_direction[], int num_requests){
     total_tracks--;
     int seek_time = 0;
@@ -289,9 +286,205 @@ void c_scan(int total_tracks, int init_head, int request[][2], char init_directi
     printf("%d\n", completion_time);
 }
 void look(int total_tracks, int init_head, int request[][2], char init_direction[], int num_requests){
+       total_tracks--;
+    int seek_time = 0;
+    int completion_time = 0;
+    int processed[num_requests];
+    for (int i = 0; i < num_requests; i++) {
+        processed[i] = 0;
+    }
+
+    printf("\n");
+
+    int counter = 0;
+
+    while(counter < num_requests){
+        if (init_direction[0] == 'U'){
+            // Find nearest unprocessed request >= current head moving UP
+            int nearest = -1;
+            int min_dist = INT_MAX;
+            
+            // Loop through requests to find the nearest one in the current direction
+            for (int i = 0; i < num_requests; i++){
+                if (!processed[i] && request[i][0] <= completion_time && request[i][1] >= init_head) {
+                    int distance = abs(init_head - request[i][1]);
+                    if (distance < min_dist) {
+                        min_dist = distance;
+                        nearest = i;
+                    }
+                }
+            }
+            
+            // Process nearest request if found, otherwise move to end of disk and change direction
+            if (nearest != -1) {
+                int distance = abs(init_head - request[nearest][1]);
+                seek_time += distance;
+                completion_time += distance;
+                printf("%d ", request[nearest][1]);
+                init_head = request[nearest][1];
+                processed[nearest] = 1;
+                counter++;
+            } else {
+                // If no more requests in this direction, just reverse direction without moving to end/start of disk
+                init_direction[0] = 'D';
+            }
+        }
+
+        else if (init_direction[0] == 'D'){
+            // Find nearest unprocessed request <= current head moving DOWN
+            int nearest = -1;
+            int min_dist = INT_MAX;
+            
+            // Loop through requests to find the nearest one in the current direction
+            for (int i = 0; i < num_requests; i++){
+                if (!processed[i] && request[i][0] <= completion_time && request[i][1] <= init_head) {
+                    int distance = abs(init_head - request[i][1]);
+                    if (distance < min_dist) {
+                        min_dist = distance;
+                        nearest = i;
+                    }
+                }
+            }
+
+            // Process nearest request if found, otherwise move to start of disk and change direction
+            if (nearest != -1) {
+                int distance = abs(init_head - request[nearest][1]);
+                seek_time += distance;
+                completion_time += distance;
+                printf("%d ", request[nearest][1]);
+                init_head = request[nearest][1];
+                processed[nearest] = 1;
+                counter++;
+
+            } else {
+                // If no more requests in this direction, just reverse direction without moving to end/start of disk
+                init_direction[0] = 'U';
+            }
+        }
+
+        // Idle until next request arrives if needed
+        for (int i = 0; i < num_requests; i++) {
+            if (!processed[i] && request[i][0] <= completion_time) {
+                break;
+            }
+            if (!processed[i] && request[i][0] > completion_time) {
+                completion_time = request[i][0]; 
+                break;
+            }
+        }
+    }
+
+    printf("\n%d\n", seek_time);
+    printf("%d\n", completion_time);
+    
 
 }
 void c_look(int total_tracks, int init_head, int request[][2], char init_direction[], int num_requests){
+       total_tracks--;
+    int seek_time = 0;
+    int completion_time = 0;
+    int processed[num_requests];
+    for (int i = 0; i < num_requests; i++) {
+        processed[i] = 0;
+    }
+
+    printf("\n");
+
+    int counter = 0;
+
+    while(counter < num_requests){
+        if (init_direction[0] == 'U'){
+            // Find nearest unprocessed request >= current head moving UP
+            int nearest = -1;
+            int min_dist = INT_MAX;
+            
+            // Loop through requests to find the nearest one in the current direction
+            for (int i = 0; i < num_requests; i++){
+                if (!processed[i] && request[i][0] <= completion_time && request[i][1] >= init_head) {
+                    int distance = abs(init_head - request[i][1]);
+                    if (distance < min_dist) {
+                        min_dist = distance;
+                        nearest = i;
+                    }
+                }
+            }
+            
+            // Process nearest request if found, otherwise move to end of disk and change direction
+            if (nearest != -1) {
+                int distance = abs(init_head - request[nearest][1]);
+                seek_time += distance;
+                completion_time += distance;
+                printf("%d ", request[nearest][1]);
+                init_head = request[nearest][1];
+                processed[nearest] = 1;
+                counter++;
+            } else {
+                for (int i = 0; i < num_requests; i++){
+                    if (!processed[i] && request[i][0] <= completion_time) {
+                        int distance = abs(init_head - request[i][1]);
+                        seek_time += distance;
+                        completion_time += distance;
+                        init_head = request[i][1];
+                        break;
+                    }
+                }
+            }
+        }
+
+        else if (init_direction[0] == 'D'){
+            // Find nearest unprocessed request <= current head moving DOWN
+            int nearest = -1;
+            int min_dist = INT_MAX;
+            
+            // Loop through requests to find the nearest one in the current direction
+            for (int i = 0; i < num_requests; i++){
+                if (!processed[i] && request[i][0] <= completion_time && request[i][1] <= init_head) {
+                    int distance = abs(init_head - request[i][1]);
+                    if (distance < min_dist) {
+                        min_dist = distance;
+                        nearest = i;
+                    }
+                }
+            }
+
+            // Process nearest request if found, otherwise move to start of disk and change direction
+            if (nearest != -1) {
+                int distance = abs(init_head - request[nearest][1]);
+                seek_time += distance;
+                completion_time += distance;
+                printf("%d ", request[nearest][1]);
+                init_head = request[nearest][1];
+                processed[nearest] = 1;
+                counter++;
+
+            } else {
+                // If no more requests in this direction, we must wrap to the next request starting from the other end of the disk
+                for (int i = 0; i < num_requests; i++){
+                    if (!processed[i] && request[i][0] <= completion_time) {
+                        int distance = abs(init_head - request[i][1]);
+                        seek_time += distance;
+                        completion_time += distance;
+                        init_head = request[i][1];
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Idle until next request arrives if needed
+        for (int i = 0; i < num_requests; i++) {
+            if (!processed[i] && request[i][0] <= completion_time) {
+                break;
+            }
+            if (!processed[i] && request[i][0] > completion_time) {
+                completion_time = request[i][0]; 
+                break;
+            }
+        }
+    }
+
+    printf("\n%d\n", seek_time);
+    printf("%d\n", completion_time);
 
 }
 
